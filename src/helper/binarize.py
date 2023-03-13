@@ -1,6 +1,6 @@
 # Transform the dataset of n classes, n > 2 to 2 binary datasets
 import os
-import log
+# import log
 import torch
 import random
 import argparse

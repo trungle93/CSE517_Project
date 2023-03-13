@@ -1,3 +1,5 @@
+This repo contains code for the CSE517 reproducibility project. The project attempts to reproduce results from the EMNLP 2022 paper ["Finding Skill Neurons in Pre-trained Transformer-based Language Models"](https://arxiv.org/abs/2211.07349). The code from this paper is taken from the [original repo](https://github.com/THU-KEG/Skill-Neuron.git) provided by the paper's authors. The codebase was slightly modified to accomodate experiments on BERT. Below are instructions from the original README to prepare data, finetune models, find and evaluate properties of skill neurons. Analysis code for extra experiments is provided in extra.ipynb notebook.
+
 Source code and dataset for EMNLP 2022 paper ["Finding Skill Neurons in Pre-trained Transformer-based Language Models"](https://arxiv.org/abs/2211.07349).
 
 ## Data Preparation

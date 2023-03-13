@@ -9,7 +9,8 @@ from dataset import *
 def main():
     # Arg Parsing
     parser = argparse.ArgumentParser(description="Command line interface for Delta Tuning.")
-    parser.add_argument("--model_type", default = "RobertaPrompt", type = str, help = "type of model")
+    # parser.add_argument("--model_type", default = "RobertaPrompt", type = str, help = "type of model")
+    parser.add_argument("--model_type", default = "BertPrompt", type = str, help = "type of model")
     parser.add_argument("--prompt_size", default = 16, type=int, help="how many words are used as prompting, when set to 0, degenerate to finetuning")
     parser.add_argument("-p","--from_pretrained", action = "store_true", help = "From Pretrained or Not")
     parser.add_argument("--load_backbone",default = "",type = str,help = "Use customized backbone instead of hugging face provided")

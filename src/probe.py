@@ -17,7 +17,8 @@ def create_dir(name):
 
 def main():
     parser = argparse.ArgumentParser(description = "Command line interface for Skill-Neuron Probing.")
-    parser.add_argument("--model_type", default = "RobertaPrompt", type = str, help = "type of model")
+    # parser.add_argument("--model_type", default = "RobertaPrompt", type = str, help = "type of model")
+    parser.add_argument("--model_type", default = "BertPrompt", type = str, help = "type of model")
     parser.add_argument("--prompt_size", default = 16, type=int, help="how many words are used as prompting, when set to 0, degenerate to finetuning")
     parser.add_argument("-p","--from_pretrained", action = "store_true", help = "From Pretrained or Not")
     parser.add_argument("--load_backbone",default = "",type = str,help = "Use customized backbone instead of hugging face provided")
@@ -70,9 +71,9 @@ def main():
     if args.from_pretrained or args.load_backbone:
         t.load(args.resume_from)
 
-    # Test subnetwork temporary
-    if args.add_mask:
-        t.addmask(args.add_mask, thspath = args.ths_path ,cmp = False)
+    # # Test subnetwork temporary
+    # if args.add_mask:
+    #     t.addmask(args.add_mask, thspath = args.ths_path ,cmp = False)
 
 
 

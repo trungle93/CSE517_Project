@@ -30,7 +30,8 @@ def main():
     parser.add_argument("--verb", default = "", type = str, help = "Verbalizers, seperating by commas")
 
 
-    parser.add_argument("--model_type", default = "RobertaPrompt", type = str, help = "type of model")
+    # parser.add_argument("--model_type", default = "RobertaPrompt", type = str, help = "type of model")
+    parser.add_argument("--model_type", default = "BertPrompt", type = str, help = "type of model")
     parser.add_argument("--prompt_size", default = 16, type=int, help="how many words are used as prompting, when set to 0, degenerate to finetuning")
     parser.add_argument("-p","--from_pretrained", action = "store_true", help = "From Pretrained or Not")
     parser.add_argument("--save_to", type = str,default = "")

@@ -43,6 +43,17 @@ class trainer:
                 self.model = RobertaBias(args)
             elif("Adapter" in args.model_type):
                 self.model = RobertaAdapter(args)
+        print('args.model_type', args.model_type)
+        if("Bert" in args.model_type):
+            if("Prompt" in args.model_type):
+                if("Prune" in args.model_type):
+                    self.model = BertPrunePrompt(args)
+                else:
+                    self.model = BertPrompt(args)
+            elif("Bias" in args.model_type):
+                self.model = BertBias(args)
+            elif("Adapter" in args.model_type):
+                self.model = BertAdapter(args)
     
     #training step
     def mlm_train_step(self,labeled_batch,return_length=False) -> torch.Tensor:
@@ -390,7 +401,7 @@ class trainer:
         self.model.pmask = torch.load(maskpath)
         if cmp:
             for k in range(self.model.layer_num):
-                N = (self.model.pmask[k]).sum()
+                N = (self.model.pmask[k]).sum()  ##########
                 idx = torch.randperm(self.model.layer_width)
                 self.model.pmask[k] = 0
                 for x in range(N):

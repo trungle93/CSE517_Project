@@ -9,12 +9,12 @@ from re import L
 from turtle import forward
 import torch
 import random
-from transformers import AutoModelForMaskedLM, AutoTokenizer,AdapterConfig,AutoModelWithLMHead, GPT2LMHeadModel, GPT2Tokenizer,AutoModelForPreTraining
+from transformers import AutoModelForMaskedLM, AutoTokenizer, AdapterConfig, AutoModelWithLMHead, GPT2LMHeadModel, GPT2Tokenizer, AutoModelForPreTraining
 
 
-modelpath = "/data/MODELS/"
-gptprepath = "/data/wxz/gpt-pretrained/"
-bertprepath = "/data/wxz/bert-pretrained/"
+modelpath = "./data/MODELS/"
+gptprepath = "./data/wxz/gpt-pretrained/"
+bertprepath = "./data/wxz/bert-pretrained/"
 
 ### Basemodel
 class BaseModel(torch.nn.Module):
@@ -101,9 +101,9 @@ class PromptBaseModel(BaseModel):
         parameter["pos"] = self.pos
         torch.save(parameter,path + "-backbone")
     def load(self, path):
-        if(self.args.load_backbone):
-            print("loading backbone from "+self.args.load_backbone)
-            self.backbone.load_state_dict(torch.load(self.args.load_backbone))
+        # if(self.args.load_backbone):
+        #     print("loading backbone from "+self.args.load_backbone)
+        #     self.backbone.load_state_dict(torch.load(self.args.load_backbone))
         if(self.args.from_pretrained):
             parameter = torch.load(path + "-backbone")
             state = self.state_dict()
@@ -213,12 +213,15 @@ class AdapterBaseModel(BaseModel):
 ### RobertaPrompt
 class RobertaPrompt(MLMPromptBaseModel):
     def __init__(self, args):
-        self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"roberta-base")
+        # self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"roberta-base")
+        # self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"roberta-base", local_files_only=True)
+        self.tokenizer= AutoTokenizer.from_pretrained("roberta-base")
         self.layer_num = 12
         self.layer_width = 3072
         super().__init__(args)
     def getmodel(self):
-        self.backbone= AutoModelForMaskedLM.from_pretrained(modelpath+"roberta-base")
+        # self.backbone= AutoModelForMaskedLM.from_pretrained(modelpath+"roberta-base")
+        self.backbone= AutoModelForMaskedLM.from_pretrained("roberta-base")
     def processoutput(self, outputs):
         return outputs.logits[:,0,self.pos].squeeze(dim = 1)
     def intermediate(self,n):
@@ -227,12 +230,32 @@ class RobertaPrompt(MLMPromptBaseModel):
         return self.backbone.roberta.embeddings.word_embeddings(input_ids).detach()
 
 
+class BertPrompt(MLMPromptBaseModel):
+    def __init__(self, args):
+        # self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"bert-base")
+        # self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"bert-base", local_files_only=True)
+        self.tokenizer= AutoTokenizer.from_pretrained("bert-base-cased")
+        self.layer_num = 12
+        self.layer_width = 3072
+        super().__init__(args)
+    def getmodel(self):
+        # self.backbone= AutoModelForMaskedLM.from_pretrained(modelpath+"bert-base")
+        self.backbone= AutoModelForMaskedLM.from_pretrained("bert-base-cased")
+    def processoutput(self, outputs):
+        return outputs.logits[:,0,self.pos].squeeze(dim = 1)
+    def intermediate(self,n):
+        return self.backbone.bert.encoder.layer[n].intermediate
+    def embed(self, input_ids):
+        return self.backbone.bert.embeddings.word_embeddings(input_ids).detach()
+
+
 
 ### RobertaPruneRoberta
 
 class RobertaPrunePrompt(MLMPromptBaseModel):
     def __init__(self, args):
-        self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"roberta-base")
+        # self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"roberta-base")
+        self.tokenizer= AutoTokenizer.from_pretrained("roberta-base")
         self.layer_num = 12
         self.layer_width = 3072
         super().__init__(args)
@@ -244,6 +267,31 @@ class RobertaPrunePrompt(MLMPromptBaseModel):
         return self.backbone.roberta.encoder.layer[n].intermediate
     def embed(self, input_ids):
         return self.backbone.roberta.embeddings.word_embeddings(input_ids).detach()
+    def load(self, path):
+        parameter = torch.load(path + "-backbone")
+        self.pos = parameter["pos"]
+        self.load_state_dict(parameter, strict = False)
+    def save(self, path):
+        parameter = self.state_dict()
+        parameter["pos"] = self.pos
+        torch.save(parameter,path + "-backbone")
+
+
+class BertPrunePrompt(MLMPromptBaseModel):
+    def __init__(self, args):
+        # self.tokenizer= AutoTokenizer.from_pretrained(modelpath+"roberta-base")
+        self.tokenizer= AutoTokenizer.from_pretrained("bert-base-cased")
+        self.layer_num = 12
+        self.layer_width = 3072
+        super().__init__(args)
+    def getmodel(self):
+        self.backbone = torch.load("prune_structure/PruneBert")
+    def processoutput(self, outputs):
+        return outputs.logits[:,0,self.pos].squeeze(dim = 1)
+    def intermediate(self,n):
+        return self.backbone.bert.encoder.layer[n].intermediate
+    def embed(self, input_ids):
+        return self.backbone.bert.embeddings.word_embeddings(input_ids).detach()
     def load(self, path):
         parameter = torch.load(path + "-backbone")
         self.pos = parameter["pos"]

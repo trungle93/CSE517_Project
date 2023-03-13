@@ -35,8 +35,10 @@ def main():
 
 
 
-    roberta = AutoModelForMaskedLM.from_pretrained("roberta-base")
-    state_dict = roberta.state_dict()
+    # roberta = AutoModelForMaskedLM.from_pretrained("roberta-base")
+    bert = AutoModelForMaskedLM.from_pretrained("bert-base-cased")
+    # state_dict = roberta.state_dict()
+    state_dict = bert.state_dict()
     prompt = torch.load(args.resume_from,map_location="cpu")
 
 
@@ -49,10 +51,14 @@ def main():
     for k in range(3,12):
         pbias = ths[k]
         pmask = mask[k]
-        inputweight =  state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.weight']
-        inputbias =  state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.bias']
-        outputweight = state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.weight']
-        outputbias = state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.bias']
+        # inputweight =  state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.weight']
+        # inputbias =  state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.bias']
+        # outputweight = state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.weight']
+        # outputbias = state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.bias']
+        inputweight =  state_dict['bert.encoder.layer.'+str(k)+'.intermediate.dense.weight']
+        inputbias =  state_dict['bert.encoder.layer.'+str(k)+'.intermediate.dense.bias']
+        outputweight = state_dict['bert.encoder.layer.'+str(k)+'.output.dense.weight']
+        outputbias = state_dict['bert.encoder.layer.'+str(k)+'.output.dense.bias']
         idx = []
         for i in range(3072):
             if(pmask[i]):
@@ -66,10 +72,14 @@ def main():
         diffbias = torch.matmul(outputweight, pbias.float())
         outputbias = outputbias+diffbias
         outputweight = outputweight[:,idx]
-        state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.weight'] = inputweight
-        state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.bias'] = inputbias
-        state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.weight'] = outputweight
-        state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.bias'] = outputbias 
+        # state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.weight'] = inputweight
+        # state_dict['roberta.encoder.layer.'+str(k)+'.intermediate.dense.bias'] = inputbias
+        # state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.weight'] = outputweight
+        # state_dict['roberta.encoder.layer.'+str(k)+'.output.dense.bias'] = outputbias 
+        state_dict['bert.encoder.layer.'+str(k)+'.intermediate.dense.weight'] = inputweight
+        state_dict['bert.encoder.layer.'+str(k)+'.intermediate.dense.bias'] = inputbias
+        state_dict['bert.encoder.layer.'+str(k)+'.output.dense.weight'] = outputweight
+        state_dict['bert.encoder.layer.'+str(k)+'.output.dense.bias'] = outputbias 
     for key in state_dict:
         prompt["backbone."+key] = state_dict[key]
 
